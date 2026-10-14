@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Regular Expressions for Everyone</title>
+<style>
+:root{--bg:#f5f4fa;--surface:#fff;--ink:#1c1b2e;--mute:#625f7d;--line:#d9d6ea;--accent:#4a43c8;--accent-ink:#fff;--code:#17152b;--code-ink:#dcd9ff;--ok:#14794a;--bad:#a8321f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13121f;--surface:#1c1a2e;--ink:#e8e6fa;--mute:#9d9ac0;--line:#322f4d;--accent:#a5a0ff;--accent-ink:#13112e;--code:#0e0d1a;--code-ink:#dcd9ff;--ok:#5fd394;--bad:#ff8b78}}
+:root[data-theme="dark"]{--bg:#13121f;--surface:#1c1a2e;--ink:#e8e6fa;--mute:#9d9ac0;--line:#322f4d;--accent:#a5a0ff;--accent-ink:#13112e;--code:#0e0d1a;--code-ink:#dcd9ff;--ok:#5fd394;--bad:#ff8b78}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Georgia,"Iowan Old Style",serif}
+h1,h2,h3,button,nav,.tag,.meta,label{font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif}
+header{padding:28px 20px 8px;max-width:1000px;margin:0 auto}
+h1{font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.15;margin:0 0 8px}
+header p{max-width:62ch;color:var(--mute);margin:0 0 14px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;max-width:420px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.meta{font-size:.85rem;color:var(--mute);margin-top:6px}
+.wrap{display:grid;grid-template-columns:230px 1fr;gap:24px;max-width:1000px;margin:0 auto;padding:16px 20px 60px}
+nav{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:4px}
+nav button{text-align:left;background:none;border:1px solid transparent;color:var(--ink);padding:8px 10px;border-radius:6px;cursor:pointer;font-size:.92rem}
+nav button:hover{border-color:var(--line)}
+nav button[aria-current="true"]{background:var(--surface);border-color:var(--accent);font-weight:700}
+nav button.done::after{content:" ✓";color:var(--ok)}
+main{min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;margin-bottom:16px}
+h2{margin:0 0 4px;font-size:1.5rem}
+h3{margin:0 0 8px;font-size:1.05rem}
+.goal{color:var(--mute);margin:0 0 12px}
+ul{padding-left:20px;margin:0}
+pre{background:var(--code);color:var(--code-ink);padding:14px;border-radius:6px;overflow-x:auto;font:13.5px/1.5 ui-monospace,Menlo,Consolas,monospace;margin:4px 0 10px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.lang{font:600 .8rem "Trebuchet MS",system-ui,sans-serif;color:var(--mute)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.filters button,.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:5px 11px;border-radius:999px;cursor:pointer;font-size:.85rem}
+.filters button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);border-radius:6px;padding:8px 14px}
+.res,.exr{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);align-items:baseline}
+.res:first-of-type,.exr:first-of-type{border-top:0}
+.exr{align-items:center;justify-content:space-between}
+.exr code{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 6px;word-break:break-all}
+.exr span{color:var(--mute);font-size:.92rem;display:block;margin-top:2px}
+.tag{flex:none;font-size:.75rem;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--mute);min-width:62px;text-align:center}
+.res a{color:var(--accent);font-weight:600}
+.res span.n{color:var(--mute);font-size:.9rem}
+.q{margin:12px 0}
+.q p{margin:0 0 6px;font-weight:600}
+.opt{display:block;width:100%;text-align:left;margin:4px 0;padding:8px 10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;cursor:pointer;font:inherit}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,var(--surface))}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,var(--surface))}
+.why{font-size:.92rem;color:var(--mute);margin-top:4px}
+.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.pgrow{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:8px}
+.pgrow label{font-size:.82rem;color:var(--mute);display:block}
+input,textarea{width:100%;font:14px ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px}
+#pat{min-width:200px}
+.out{white-space:pre-wrap;word-break:break-word;font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);margin-top:8px;min-height:48px}
+mark{background:color-mix(in srgb,var(--accent) 28%,transparent);color:inherit;border-radius:3px;box-shadow:0 0 0 1px var(--accent)}
+mark.cur{background:var(--accent);color:var(--accent-ink)}
+#st{font-size:.9rem;color:var(--mute);margin-top:6px;min-height:1.4em}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}nav{position:static;flex-direction:row;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+<h1>Regular expressions for everyone</h1>
+<p>A hands-on course for complete beginners. Learn to find, extract, and replace text with patterns. Modules 1 to 6 need no programming; module 7 adds Python and R. Every example loads into the live tester, and each module ends with a quiz. About 4 to 6 weeks at a few hours a week (a rough guide). Check each linked site for current content.</p>
+<div class="bar" aria-hidden="true"><i id="pb"></i></div>
+<div class="meta" id="pt"></div>
+</header>
+<div class="wrap">
+<nav id="nav" aria-label="Modules"></nav>
+<main>
+<div class="card" id="pg">
+<h3>Live tester</h3>
+<div class="pgrow"><div style="flex:1"><label for="pat">Pattern</label><input id="pat" spellcheck="false" autocomplete="off"></div><div style="width:90px"><label for="fl">Flags</label><input id="fl" spellcheck="false" autocomplete="off"></div><button class="btn primary" id="stp">Step through matches</button></div>
+<label for="txt" style="font-size:.82rem;color:var(--mute)">Text to search</label>
+<textarea id="txt" rows="3" spellcheck="false"></textarea>
+<div class="out" id="out" aria-live="polite"></div>
+<div id="st"></div>
+<div class="meta">Uses your browser's JavaScript regex engine. Python and R differ slightly (see module 7). Flags: g all matches, i ignore case, m ^ and $ per line.</div>
+</div>
+<div id="mod"></div>
+</main>
+</div>
+<script>
+var M=[
+{t:"What is a regex?",time:"1 evening",goal:"Match literal text and see matches highlight live.",
+learn:["A regular expression (regex) is a pattern that describes text. Tools use it to find, validate, extract, or replace text.","Most characters match themselves. The dot . matches any single character except a newline.","Special characters . * + ? ( ) [ ] { } ^ $ | \\ must be escaped with a backslash to match literally."],
+ex:[["cat","g","The cat sat on the cat mat.","Literal text matches every occurrence."],["c.t","g","cat cot cut c t ct","Dot is one character, even a space. 'ct' has none, so no match."],["3\\.14","g","Pi is 3.14, not 3x14.","The escaped dot matches only a real period."]],
+app:"Find and replace in editors like VS Code, searching logs with grep, cleaning up exported spreadsheets.",
+py:"import re\nprint(re.findall(r'cat', 'The cat sat on the cat mat.'))  # ['cat', 'cat']",
+r:"x <- 'The cat sat on the cat mat.'\nregmatches(x, gregexpr('cat', x))[[1]]  # 'cat' 'cat'",
+res:[["Practice","RegexOne","https://regexone.com","Short interactive lessons, no setup"],["Tool","regex101","https://regex101.com","Explains every part of your pattern"],["Read","regular-expressions.info","https://www.regular-expressions.info","Comprehensive free tutorial and reference"],["Video","freeCodeCamp (YouTube)","https://www.youtube.com/@freecodecamp","Search the channel for full regex courses"]],
+quiz:[["Which pattern matches a literal period?",[".","\\.","\\d"],1,"A backslash turns a special character into a plain one."],["c.t matches:",["cat","ct","Both"],0,"The dot needs exactly one character between c and t."],["Regex is mainly used to:",["Find, extract, validate, or replace text","Compile programs","Draw charts"],0,"It describes text patterns for search and edit tools."]]},
+{t:"Character classes",time:"3 to 4 days",goal:"Match kinds of characters: digits, letters, whitespace, or custom sets.",
+learn:["Shorthands: \\d digit, \\w letter/digit/underscore, \\s whitespace. Uppercase versions (\\D \\W \\S) mean the opposite.","[abc] matches one of the listed characters; [a-z] is a range; [^abc] matches anything except those.","Inside [ ], most special characters lose their meaning."],
+ex:[["\\d+","g","Order 66 shipped on day 365.","Digits; + (next module) means one or more."],["[aeiou]","gi","Regular Expressions","A set matches any one listed character."],["[^aeiou\\s]+","g","regex is fun","Negated set: runs of non-vowel, non-space characters."],["\\w+@\\w+","g","mail ann@site or bo@web","\\w matches the letters around the @."]],
+app:"Pulling numbers from receipts, stripping punctuation before text analysis, spotting codes like A1B2.",
+py:"print(re.findall(r'\\d+', 'Order 66 on day 365'))  # ['66', '365']",
+r:"library(stringr)\nstr_extract_all('Order 66 on day 365', '\\\\d+')[[1]]  # '66' '365'",
+res:[["Cheat sheet","RexEgg quick start","https://www.rexegg.com/regex-quickstart.php","One-page reference of syntax"],["Practice","RegexLearn","https://regexlearn.com","Step-by-step lessons in the browser"],["Docs","MDN regex guide","https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions","Clear tables of classes and assertions"],["Game","RegexCrossword","https://regexcrossword.com","Crosswords solved with patterns"]],
+quiz:[["Which matches any single digit?",["\\d","\\w","\\s"],0,"\\d is a digit, \\w a word character, \\s whitespace."],["[^0-9] matches:",["A digit","Any character that is not a digit","Nothing"],1,"A ^ at the start of a set negates it."],["\\w does NOT match:",["An underscore","A space","A letter"],1,"\\w covers letters, digits, and underscore."]]},
+{t:"Quantifiers: how many?",time:"3 to 4 days",goal:"Control repetition, and understand greedy versus lazy matching.",
+learn:["* zero or more, + one or more, ? zero or one, {n} exactly n, {n,m} between n and m.","Quantifiers are greedy by default: they take as much as they can while the pattern still matches.","Add ? after a quantifier (+? *? ??) to make it lazy: it takes as little as possible."],
+ex:[["colou?r","g","color colour","? makes the u optional."],["\\d{3}-\\d{4}","g","Call 555-0199 or 55-0199.","{3} and {4} demand exact counts."],["<.+>","g","<b>bold</b> text","Greedy: one match from the first < to the last >."],["<.+?>","g","<b>bold</b> text","Lazy: stops at the first >, giving two tags."]],
+app:"Validating phone and ID formats, collapsing repeated whitespace, grabbing text between two markers.",
+py:"print(re.sub(r'\\s+', ' ', 'too    many   spaces'))  # 'too many spaces'",
+r:"gsub('\\\\s+', ' ', 'too    many   spaces')  # 'too many spaces'",
+res:[["Read","Repetition (regular-expressions.info)","https://www.regular-expressions.info/repeat.html","Greedy and lazy explained in depth"],["Tool","Debuggex","https://www.debuggex.com","Draws your pattern as a diagram"],["Practice","RegexOne","https://regexone.com","Lessons on repetition"],["Video","Corey Schafer (YouTube)","https://www.youtube.com/@coreyms","Includes a Python regex tutorial"]],
+quiz:[["Which quantifier means one or more?",["*","+","?"],1,"+ needs at least one; * allows zero."],["<.+?> on '<a><b>' finds:",["One match: <a><b>","Two matches: <a> and <b>","No match"],1,"The lazy +? stops at the first >."],["a{2,4} on 'aaaaa' first matches:",["aa","aaaa","aaaaa"],1,"Greedy takes up to 4; the leftover a can't match alone."]]},
+{t:"Anchors, boundaries, and choices",time:"3 to 4 days",goal:"Pin matches to positions and offer alternatives.",
+learn:["^ matches the start and $ the end of the text (of each line with the m flag).","\\b is a word boundary: the edge between a word character and a non-word character.","| means or. Wrap it in parentheses to limit its reach: gr(a|e)y."],
+ex:[["^\\w+","gm","first line\nsecond line","^ anchors each line start (m flag)."],["\\.csv$","gm","a.csv\nb.csv.bak\nc.csv","$ anchors the line end, so b.csv.bak is skipped."],["\\bcat\\b","gi","cat concatenate Cat scatter","Boundaries avoid matches inside other words."],["gr(a|e)y","g","gray grey groy","Alternation inside a group."]],
+app:"Checking a whole field matches a format, filtering log lines by level (ERROR|WARN), finding whole words only.",
+py:"print(re.findall(r'\\bcat\\b', 'cat concatenate Cat'))  # ['cat']",
+r:"grepl('^\\\\d+$', c('123', '12a'))  # TRUE FALSE",
+res:[["Read","Anchors (regular-expressions.info)","https://www.regular-expressions.info/anchors.html","Start, end, and boundaries"],["Docs","Python Regex HOWTO","https://docs.python.org/3/howto/regex.html","Beginner-friendly official guide"],["Tool","regex101","https://regex101.com","Hover over parts to see explanations"],["Practice","RegexOne","https://regexone.com","Anchors and alternation lessons"]],
+quiz:[["Does \\bcat\\b match inside 'concatenate'?",["Yes","No","Only with the i flag"],1,"There is no word boundary inside a word."],["Outside brackets, ^ means:",["Start of the text or line","Negation","A literal caret"],0,"At the start of [ ] it negates instead."],["^\\d+$ on '123abc':",["Matches 123","No match","Matches abc"],1,"$ requires digits all the way to the end."]]},
+{t:"Groups and backreferences",time:"4 to 5 days",goal:"Capture parts of a match, reuse them, and reformat text.",
+learn:["Parentheses create a capture group, numbered by opening parenthesis. The tester shows the groups of the first match.","\\1, \\2 repeat what an earlier group matched. In replacements, they let you rearrange text.","(?:...) groups without capturing. Named groups differ by language: JavaScript (?<name>...), Python (?P<name>...)."],
+ex:[["(\\d{4})-(\\d{2})-(\\d{2})","g","Due 2026-10-14 or 2027-01-05","Three groups: year, month, day."],["(?<year>\\d{4})-(?<month>\\d{2})","g","2026-10-14","Named groups make results readable."],["\\b(\\w+) \\1\\b","gi","this is is a test, the the end","Finds doubled words."],["(?:Mr|Ms)\\. \\w+","g","Mr. Lee and Ms. Park","Non-capturing group."]],
+app:"Extracting parts of dates and log lines, swapping 'Last, First' to 'First Last', finding typos like 'the the'.",
+py:"print(re.sub(r'(\\w+), (\\w+)', r'\\2 \\1', 'Lovelace, Ada'))  # Ada Lovelace",
+r:"sub('(\\\\w+), (\\\\w+)', '\\\\2 \\\\1', 'Lovelace, Ada')  # 'Ada Lovelace'",
+res:[["Read","Groups (regular-expressions.info)","https://www.regular-expressions.info/brackets.html","Capturing, non-capturing, and numbering"],["Docs","Python re module","https://docs.python.org/3/library/re.html","Reference for groups and match objects"],["Practice","RegexLearn","https://regexlearn.com","Lessons on groups and backreferences"],["Game","Regex Golf","https://alf.nu/RegexGolf","Shortest pattern wins"]],
+quiz:[["In (a)(b), \\2 refers to:",["a","b","Both"],1,"Groups are numbered by their opening parenthesis."],["(?:...) is a:",["Capturing group","Non-capturing group","Comment"],1,"It groups without storing the match."],["(\\w+) \\1 is useful for finding:",["Repeated words","Dates","Line starts"],0,"\\1 must repeat whatever group 1 matched."]]},
+{t:"Lookarounds and flags",time:"4 to 5 days",goal:"Match based on surrounding text without including it.",
+learn:["Lookahead (?=...) and negative lookahead (?!...) check what follows. Lookbehind (?<=...) and (?<!...) check what precedes.","They are zero-width: they assert but do not become part of the match.","Flags change behavior: i ignores case, g finds all matches, m makes ^ and $ work per line. Stack lookaheads to check several rules at once."],
+ex:[["\\d+(?= dollars)","g","50 dollars, 20 euros","Digits only if followed by ' dollars'."],["(?<=\\$)\\d+","g","cost $30 or 40","Digits preceded by $, without the $."],["^(?=.*\\d)(?=.*[a-z]).{6,}$","gm","abc123\nabcdef\n12345","Needs a digit, a lowercase letter, and 6+ characters."],["hello","gi","Hello HELLO hello","The i flag ignores case."]],
+app:"Password-rule checks, extracting prices without currency symbols, case-insensitive search.",
+py:"print(re.findall(r'(?<=\\$)\\d+', 'cost $30 or $45'))  # ['30', '45']",
+r:"x <- 'cost $30 or $45'\nregmatches(x, gregexpr('(?<=\\\\$)\\\\d+', x, perl = TRUE))[[1]]  # perl = TRUE enables lookarounds",
+res:[["Read","Lookaround (regular-expressions.info)","https://www.regular-expressions.info/lookaround.html","Thorough explanation with examples"],["Tool","regex101","https://regex101.com","Switch flavors to see differences"],["Book","Mastering Regular Expressions","https://www.oreilly.com/library/view/mastering-regular-expressions/0596528124/","Friedl's classic on how engines work (paid)"],["Video","freeCodeCamp (YouTube)","https://www.youtube.com/@freecodecamp","Longer courses cover lookarounds"]],
+quiz:[["A lookahead like (?=...):",["Consumes the text it checks","Checks without consuming","Sets a flag"],1,"It is zero-width: it only asserts."],["(?<=\\$)\\d+ on 'cost $30' returns:",["$30","30","Nothing"],1,"The $ is checked but not part of the match."],["Which flag ignores case?",["g","i","m"],1,"i = case-insensitive; g = all matches; m = multiline."]]},
+{t:"Regex in Python and R",time:"1 week",goal:"Use patterns in code, with Python's re and R's base and stringr functions.",
+learn:["Python: re.search (anywhere), re.match (start), re.fullmatch (whole string), re.findall, re.sub. Use raw strings r'...' so backslashes reach the engine.","R: base functions (grepl, sub, gsub, regmatches) or stringr (str_detect, str_extract, str_replace_all). R strings need doubled backslashes, like '\\\\d'.","Flavors differ in details such as named-group syntax and lookbehind limits. In base R, add perl = TRUE for lookarounds. Test on both matching and non-matching samples."],
+ex:[["[\\w.]+@[\\w.]+\\.\\w+","g","ann@site.org, bo.li@web.co.uk","A simple email finder: fine for extraction, not for strict validation."],["https?://\\S+","g","See https://regex101.com and http://example.org today","Optional s, then a run of non-space characters."],["\\b\\d{1,2}/\\d{1,2}/\\d{4}\\b","g","Born 3/9/1990, wed 12/05/2015","US-style dates."]],
+app:"Cleaning data frames, extracting IDs from file names, tokenizing text for analysis.",
+py:"import re\nm = re.search(r'(?P<y>\\d{4})-(?P<m>\\d{2})', 'Due 2026-10-14')\nprint(m.group('y'), m['m'])                 # 2026 10\nprint(re.fullmatch(r'\\d+', '123') is not None)  # True: whole string\npat = re.compile(r'''\n    \\d{3}    # prefix\n    -\\d{4}   # line number\n''', re.VERBOSE)\nprint(pat.search('call 555-0199').group())  # 555-0199",
+r:"library(stringr)\nstr_detect(c('a1', 'bb'), '\\\\d')                  # TRUE FALSE\nstr_replace_all('a-b-c', '-', '_')            # 'a_b_c'\nstr_match('Due 2026-10-14', '(\\\\d{4})-(\\\\d{2})')  # full match, then groups",
+res:[["Docs","Python Regex HOWTO","https://docs.python.org/3/howto/regex.html","Official, beginner-friendly"],["Docs","Python re module","https://docs.python.org/3/library/re.html","Full reference"],["Book","R for Data Science: Regular expressions","https://r4ds.hadley.nz/regexps.html","Free chapter using stringr"],["Docs","stringr regex guide","https://stringr.tidyverse.org/articles/regular-expressions.html","Syntax reference for R users"],["Book","Automate the Boring Stuff, ch. 7","https://automatetheboringstuff.com/2e/chapter7/","Python regex for everyday tasks"]],
+quiz:[["Why use raw strings like r'\\d' in Python?",["So backslashes reach the regex engine unchanged","They run faster","They are required for all strings"],0,"Otherwise Python processes some backslash escapes first."],["In an R string, to give the regex \\d you type:",["\\d","\\\\d","/d"],1,"R reads the string first, so type \\\\d to hand \\d to the regex."],["re.fullmatch succeeds only if:",["The whole string matches","The start matches","Any part matches"],0,"re.search finds any part; re.match checks the start."]]},
+{t:"Real-world uses and pitfalls",time:"Ongoing",goal:"Apply regex to real tasks and know when not to.",
+learn:["Don't parse HTML or other nested formats with regex. Use a parser (BeautifulSoup in Python, rvest in R).","Nested quantifiers like (a+)+ can trigger catastrophic backtracking (ReDoS) in some engines. Keep patterns simple and test on long inputs.","A regex can check an email's shape, not whether it exists. Send a confirmation message instead.","Keep patterns readable: use comments (re.VERBOSE), name groups, and test non-matching samples too."],
+ex:[["^\\(?\\d{3}\\)?[-. ]?\\d{3}[-. ]?\\d{4}$","gm","(555) 123-4567\n555.123.4567\n5551234567\n55-1234","US phone formats; the last line fails."],["^(ERROR|WARN)\\b.*$","gm","INFO start\nERROR disk full\nWARN low memory","Pick out important log lines."],["\\b[A-Z][a-z]+\\b","g","Ada met Alan in Paris.","Capitalized words, a rough name finder."]],
+app:"Log analysis, data cleaning in pandas or dplyr, form validation, text mining, searching DNA sequences for motifs.",
+py:"import pandas as pd\ndf = pd.DataFrame({'date': ['2026-10-14', 'Oct 2025']})\ndf['year'] = df['date'].str.extract(r'(\\d{4})')  # 2026, 2025",
+r:"library(dplyr); library(stringr)\ndf <- data.frame(date = c('2026-10-14', 'Oct 2025'))\ndf |> mutate(year = str_extract(date, '\\\\d{4}'))",
+res:[["Lecture","Regular Expression Matching Can Be Simple And Fast (Russ Cox)","https://swtch.com/~rsc/regexp/regexp1.html","Why some engines slow down and how others avoid it"],["Read","OWASP: ReDoS","https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS","Security view of slow patterns"],["Game","RegexCrossword","https://regexcrossword.com","Keep practicing"],["Game","Regex Golf","https://alf.nu/RegexGolf","Shortest-pattern puzzles"],["Video","Computerphile (YouTube)","https://www.youtube.com/@Computerphile","Search for regular expression videos"],["Book","Mastering Regular Expressions","https://www.oreilly.com/library/view/mastering-regular-expressions/0596528124/","Deep dive on engines (paid)"]],
+quiz:[["Best tool for parsing HTML?",["A big regex","A real parser (BeautifulSoup, rvest)","grep"],1,"HTML nests; regex handles that poorly."],["ReDoS refers to:",["A flag","Patterns that take extreme time on some inputs","A Python module"],1,"Nested quantifiers can cause catastrophic backtracking."],["Best way to check an email address is real?",["A giant regex","Send a confirmation message","Count the @ signs"],1,"A regex checks shape, not existence."]]}
+];
+var KEY="regex-course-done",done={},cur=0,filt="All",timer=null,total=0;
+try{done=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+function g(i){return document.getElementById(i)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function prog(){var n=Object.keys(done).filter(function(k){return done[k]}).length;g("pb").style.width=(100*n/M.length)+"%";g("pt").textContent=n+" of "+M.length+" modules complete"}
+function run(limit){var P=g("pat").value,F=g("fl").value,T=g("txt").value,o=g("out"),s=g("st");
+if(F.indexOf("g")<0)F+="g";var re,all=[],m,last=0,h="";
+try{re=new RegExp(P,F)}catch(e){o.textContent=T;s.textContent="Invalid pattern: "+e.message;total=0;return}
+if(!P){o.textContent=T;s.textContent="Type a pattern to see matches.";total=0;return}
+while((m=re.exec(T))!==null&&all.length<500){all.push(m);if(m[0]==="")re.lastIndex++}
+total=all.length;var k=limit==null?all.length:limit;
+all.slice(0,k).forEach(function(m,i){h+=esc(T.slice(last,m.index))+"<mark"+(limit!=null&&i===k-1?' class="cur"':"")+">"+esc(m[0])+"</mark>";last=m.index+m[0].length});
+o.innerHTML=h+esc(T.slice(last));
+s.textContent=(limit!=null?"Showing "+k+" of "+total+" matches":total+" match"+(total===1?"":"es"))+(all[0]&&all[0].length>1?". Groups in first match: "+JSON.stringify(all[0].slice(1)):"")}
+function live(){clearInterval(timer);run()}
+function step(){clearInterval(timer);run(0);if(!total||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)){run();return}
+var i=0;timer=setInterval(function(){i++;run(i);if(i>=total)clearInterval(timer)},700)}
+function load(e){clearInterval(timer);g("pat").value=e[0];g("fl").value=e[1];g("txt").value=e[2];run();g("pg").scrollIntoView()}
+function nav(){var h="";M.forEach(function(m,i){h+='<button data-i="'+i+'"'+(i===cur?' aria-current="true"':"")+(done[i]?' class="done"':"")+">"+(i+1)+". "+esc(m.t)+"</button>"});
+g("nav").innerHTML=h;g("nav").querySelectorAll("button").forEach(function(b){b.onclick=function(){cur=+b.dataset.i;filt="All";nav();render();window.scrollTo(0,0)}})}
+function render(){var m=M[cur],h="";
+h+='<div class="card"><h2>'+esc(m.t)+'</h2><div class="meta">Time: '+m.time+'</div><p class="goal">Goal: '+esc(m.goal)+"</p><h3>What to learn</h3><ul>"+m.learn.map(function(x){return"<li>"+esc(x)+"</li>"}).join("")+"</ul></div>";
+h+='<div class="card"><h3>Examples: tap Try it to load one in the tester</h3>'+m.ex.map(function(e,i){return'<div class="exr"><div><code>/'+esc(e[0])+"/"+e[1]+"</code><span>"+esc(e[3])+'</span></div><button class="btn" data-e="'+i+'">Try it</button></div>'}).join("")+"</div>";
+h+='<div class="card"><h3>Where you will see this</h3><p style="margin:0">'+esc(m.app)+'</p></div>';
+h+='<div class="card"><h3>In code</h3><div class="lang">Python</div><pre><code>'+esc(m.py)+'</code></pre><div class="lang">R</div><pre><code>'+esc(m.r)+"</code></pre></div>";
+var ty=["All"];m.res.forEach(function(r){if(ty.indexOf(r[0])<0)ty.push(r[0])});
+h+='<div class="card"><h3>Readings, videos, and tools</h3><div class="filters">'+ty.map(function(t){return'<button data-f="'+esc(t)+'" aria-pressed="'+(t===filt)+'">'+esc(t)+"</button>"}).join("")+"</div>";
+m.res.forEach(function(r){if(filt==="All"||r[0]===filt)h+='<div class="res"><span class="tag">'+esc(r[0])+'</span><div><a href="'+r[2]+'" target="_blank" rel="noopener noreferrer">'+esc(r[1])+'</a><br><span class="n">'+esc(r[3])+"</span></div></div>"});
+h+='</div><div class="card"><h3>Check yourself</h3>';
+m.quiz.forEach(function(q,qi){h+='<div class="q" data-q="'+qi+'"><p>'+esc(q[0])+"</p>"+q[1].map(function(o,oi){return'<button class="opt" data-o="'+oi+'">'+esc(o)+"</button>"}).join("")+'<div class="why"></div></div>'});
+h+='</div><div class="row"><button class="btn primary" id="dn">'+(done[cur]?"Mark as not done":"Mark module complete")+"</button><span>"+(cur>0?'<button class="btn" id="pv">Previous</button> ':"")+(cur<M.length-1?'<button class="btn" id="nx">Next module</button>':"")+"</span></div>";
+var mn=g("mod");mn.innerHTML=h;
+mn.querySelectorAll("[data-e]").forEach(function(b){b.onclick=function(){load(m.ex[+b.dataset.e])}});
+mn.querySelectorAll("[data-f]").forEach(function(b){b.onclick=function(){filt=b.dataset.f;render()}});
+mn.querySelectorAll(".q").forEach(function(qe){var q=m.quiz[+qe.dataset.q];qe.querySelectorAll(".opt").forEach(function(b){b.onclick=function(){var o=+b.dataset.o;qe.querySelectorAll(".opt").forEach(function(x){x.classList.remove("ok","bad")});b.classList.add(o===q[2]?"ok":"bad");qe.querySelector(".why").textContent=(o===q[2]?"Correct. ":"Not quite. ")+q[3]}})});
+g("dn").onclick=function(){done[cur]=!done[cur];save();nav();prog();render()};
+if(g("pv"))g("pv").onclick=function(){cur--;filt="All";nav();render();window.scrollTo(0,0)};
+if(g("nx"))g("nx").onclick=function(){cur++;filt="All";nav();render();window.scrollTo(0,0)}}
+g("pat").value="\\d+";g("fl").value="g";g("txt").value="Order 66 ships in 3 days, cost $45.";
+["pat","fl","txt"].forEach(function(i){g(i).oninput=live});g("stp").onclick=step;
+run();nav();render();prog();
+</script>
+</body>
+</html>
