@@ -22,10 +22,6 @@ Each module includes a goal, a time estimate, examples you can load into the liv
 1. Download `index.html`.
 2. Open it in any modern browser. There is no build step or server, and nothing to install.
 
-To host it, put `index.html` in a GitHub Pages repository.
-
-The live tester uses your browser's JavaScript regex engine. Python and R behave slightly differently in places, which module 7 explains. Your progress is saved in your browser's local storage on your own device. Nothing is sent anywhere.
-
 ## Notes on the links
 
 Resource links point to third-party sites and may change or disappear over time. If you find a broken or outdated link, please open an issue or a pull request.
